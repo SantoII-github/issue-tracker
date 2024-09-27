@@ -1,3 +1,7 @@
+const mongoose = require('mongoose');
+
+mongoose.connect(process.env.MONGO_URI);
+
 'use strict';
 
 module.exports = function (app) {
