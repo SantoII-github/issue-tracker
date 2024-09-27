@@ -17,6 +17,8 @@ const issueSchema = new mongoose.Schema({
   project_name : {type: String, required: true}
 });
 
+const Issue = mongoose.model('Issue', issueSchema);
+
 module.exports = function (app) {
 
   app.use(express.urlencoded({ extended: true }))
