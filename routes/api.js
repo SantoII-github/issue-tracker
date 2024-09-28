@@ -21,7 +21,6 @@ const Issue = mongoose.model('Issue', issueSchema);
 
 module.exports = function (app) {
 
-  app.use(express.json());
   app.use(express.urlencoded({ extended: true }))
 
   app.route('/api/issues/:project')
@@ -55,7 +54,21 @@ module.exports = function (app) {
 
       const issueList = await Issue.find(queryObj);
 
-      res.json(issueList);
+      const issueListFormatted = issueList.map( issue => {
+        return {
+          assigned_to: issue.assigned_to,
+          status_text: issue.status_text,
+          open: issue.open,
+          _id: issue._id,
+          issue_title: issue.issue_title,
+          issue_text: issue.issue_text,
+          created_by: issue.created_by,
+          created_on: issue.created_on,
+          updated_on: issue.updated_on
+        }
+      })
+
+      res.json(issueListFormatted);
     })
     
     .post(function (req, res){
