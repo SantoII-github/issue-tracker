@@ -11,9 +11,9 @@ const issueSchema = new mongoose.Schema({
   created_on: {type: Date, required: true},
   updated_on: {type: Date, required: true},
   created_by: {type: String, required: true},
-  assigned_to: {type: String, required: true},
+  assigned_to: {type: String, required: false},
   open: {type: Boolean, required: true},
-  status_text: {type: String, required: true},
+  status_text: {type: String, required: false},
   project_name : {type: String, required: true}
 });
 
@@ -21,26 +21,56 @@ const Issue = mongoose.model('Issue', issueSchema);
 
 module.exports = function (app) {
 
+  app.use(express.json());
   app.use(express.urlencoded({ extended: true }))
 
   app.route('/api/issues/:project')
   
-    .get(function (req, res){
+    .get(async function (req, res){
+      console.log(`Received Get request for project: ${req.params.project}`);
+
       let project = req.params.project;
-      
+      const queryObj = { project_name: project }
+
+      // add created and updated on filter options?
+
+      if (req.query.issue_title) {
+        queryObj.issue_title = req.query.issue_title;
+      }
+      if (req.query.issue_text) {
+        queryObj.issue_text = req.query.issue_text;
+      }
+      if (req.query.created_by) {
+        queryObj.created_by = req.query.created_by;
+      }
+      if (req.query.assigned_to) {
+        queryObj.assigned_to = req.query.assigned_to;
+      }
+      if (req.query.open) {
+        queryObj.open = req.query.open;
+      }
+      if (req.query.status_text) {
+        queryObj.status_text = req.query.status_text;
+      }
+
+      const issueList = await Issue.find(queryObj);
+
+      res.json(issueList);
     })
     
     .post(function (req, res){
-      let now = new Date();
       console.log(`Received Post request with following parameters:`);
-      console.log(req.params.project);
+      console.log(`project: ${req.params.project}`);
       console.log(req.body);
-      
+
+      let now = new Date();
+
       // make sure necessary params are present
-      if ( !(req.body.issue_title && req.body.issue_text && req.body.created_by) ) {
+      if ( !req.body.issue_title || !req.body.issue_text || !req.body.created_by ) {
         res.json({
           error: 'required field(s) missing'
         })
+        return;
       }
 
       const newIssue = new Issue({
