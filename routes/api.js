@@ -51,6 +51,12 @@ module.exports = function (app) {
       if (req.query.status_text) {
         queryObj.status_text = req.query.status_text;
       }
+      if (req.query.created_on) {
+        queryObj.created_on = new Date(req.query.created_on);
+      }
+      if (req.query.updated_on_on) {
+        queryObj.updated_on = new Date(req.query.updated_on_on);
+      }
 
       const issueList = await Issue.find(queryObj);
 
