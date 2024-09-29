@@ -79,8 +79,9 @@ module.exports = function (app) {
     
     .post(function (req, res){
       console.log(`Received Post request with following parameters:`);
-      console.log(`project: ${req.params.project}`);
-      console.log(req.body);
+      let logObject = structuredClone(req.body);
+      logObject.project = req.params.project;
+      console.log(logObject);
 
       let now = new Date();
 
@@ -108,9 +109,56 @@ module.exports = function (app) {
       res.json(newIssue);
     })
     
-    .put(function (req, res){
+    .put(async function (req, res){
+      console.log(`Received Post request with following parameters:`);
+      let logObject = structuredClone(req.body);
+      logObject.project = req.params.project;
+      console.log(logObject);
+
       let project = req.params.project;
       
+      if (!req.body._id) {
+        res.json({ error: 'missing _id' })
+        return;
+      } else if (!req.body.issue_title && !req.body.issue_text && !req.body.created_by && !req.body.assigned_to && !req.body.assigned_to && !req.body.status_text && !req.body.open) {
+        res.json({ error: 'no update field(s) sent', '_id': req.body._id })
+        return;
+      }
+
+      const issue = await Issue.findOne({ _id: req.body._id});
+      if (issue == null) {
+        res.json({ error: 'could not update', '_id': req.body._id })
+      }
+      
+      if (req.body.issue_title) {
+        issue.issue_title = req.body.issue_title;
+      }
+      if (req.body.issue_text) {
+        issue.issue_text = req.body.issue_text;
+      }
+      if (req.body.created_by) {
+        issue.created_by = req.body.created_by;
+      }
+      if (req.body.assigned_to) {
+        issue.assigned_to = req.body.assigned_to;
+      }
+      if (req.body.status_text) {
+        issue.status_text = req.body.status_text;
+      }
+      if (req.body.open) {
+        issue.open = req.body.open;
+      }
+
+      const currentTime = new Date();
+      issue.updated_on = currentTime;
+
+      issue.save().then(savedIssue => {
+        if (savedIssue !== issue) {
+          res.json({ error: 'could not update', '_id': req.body._id });
+        } else {
+          res.json({  result: 'successfully updated', '_id': req.body._id });
+        }
+      })
     })
     
     .delete(function (req, res){
