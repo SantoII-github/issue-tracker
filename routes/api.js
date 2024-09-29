@@ -31,8 +31,6 @@ module.exports = function (app) {
       let project = req.params.project;
       const queryObj = { project_name: project }
 
-      // add created and updated on filter options?
-
       if (req.query.issue_title) {
         queryObj.issue_title = req.query.issue_title;
       }
@@ -120,6 +118,9 @@ module.exports = function (app) {
       if (!req.body._id) {
         res.json({ error: 'missing _id' })
         return;
+      } else if (req.body._id.length !== 24) {
+        res.json({ error: 'could not update', '_id': req.body._id })
+        return;
       } else if (!req.body.issue_title && !req.body.issue_text && !req.body.created_by && !req.body.assigned_to && !req.body.assigned_to && !req.body.status_text && !req.body.open) {
         res.json({ error: 'no update field(s) sent', '_id': req.body._id })
         return;
@@ -161,9 +162,26 @@ module.exports = function (app) {
       })
     })
     
-    .delete(function (req, res){
+    .delete(async function (req, res){
+      console.log(`Received Delete request for project ${req.params.project}, issue ${req.body._id}`);
+
       let project = req.params.project;
       
+      if (!req.body._id) {
+        res.json({ error: 'missing _id' })
+        return;
+      } else if (req.body._id.length !== 24) {
+        res.json({ error: 'could not delete', '_id': req.body._id })
+        return;
+      }
+
+      const deleteOutput = await Issue.deleteOne({ _id: req.body._id });
+
+      if (deleteOutput.acknowledged === true && deleteOutput.deletedCount === 1) {
+        res.json({ result: 'successfully deleted', '_id': req.body._id })
+      } else {
+        res.json({ error: 'could not delete', '_id': req.body._id })
+      }
     });
     
 };
