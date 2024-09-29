@@ -129,6 +129,7 @@ module.exports = function (app) {
       const issue = await Issue.findOne({ _id: req.body._id});
       if (issue == null) {
         res.json({ error: 'could not update', '_id': req.body._id })
+        return;
       }
       
       if (req.body.issue_title) {
