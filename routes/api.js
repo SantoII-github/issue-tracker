@@ -29,53 +29,13 @@ module.exports = function (app) {
       console.log(`Received Get request for project: ${req.params.project} with query:`);
       console.log(JSON.stringify(req.query));
 
-      let project = req.params.project;
-      const queryObj = { project_name: project }
+      const issueList = await Issue.find({
+        project_name: req.params.project,
+        ...req.query
+      }).select('-__v');
 
-      if (req.query.issue_title) {
-        queryObj.issue_title = req.query.issue_title;
-      }
-      if (req.query.issue_text) {
-        queryObj.issue_text = req.query.issue_text;
-      }
-      if (req.query.created_by) {
-        queryObj.created_by = req.query.created_by;
-      }
-      if (req.query.assigned_to) {
-        queryObj.assigned_to = req.query.assigned_to;
-      }
-      if (req.query.open) {
-        queryObj.open = req.query.open;
-      }
-      if (req.query.status_text) {
-        queryObj.status_text = req.query.status_text;
-      }
-      if (req.query.created_on) {
-        queryObj.created_on = new Date(req.query.created_on);
-      }
-      if (req.query.updated_on_on) {
-        queryObj.updated_on = new Date(req.query.updated_on_on);
-      }
-
-      const issueList = await Issue.find(queryObj);
-
-      const issueListFormatted = issueList.map( issue => {
-        return {
-          assigned_to: issue.assigned_to,
-          status_text: issue.status_text,
-          open: issue.open,
-          _id: issue._id,
-          issue_title: issue.issue_title,
-          issue_text: issue.issue_text,
-          created_by: issue.created_by,
-          created_on: issue.created_on,
-          updated_on: issue.updated_on
-        }
-      })
-
-      res.json(issueListFormatted);
-      console.log(`served ${issueListFormatted.length} issues as part of get request`);
-      console.log(issueListFormatted);
+      res.json(issueList);
+      console.log(`Served ${issueList.length} issues as part of get request`);
     })
     
     .post(function (req, res){
