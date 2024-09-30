@@ -26,7 +26,7 @@ module.exports = function (app) {
   app.route('/api/issues/:project')
   
     .get(async function (req, res){
-      if (process.env.LOGGING === true) {
+      if (process.env.LOGGING) {
         console.log(`Received Get request for project: ${req.params.project} with query:`);
         console.log(JSON.stringify(req.query));
       }
@@ -37,13 +37,13 @@ module.exports = function (app) {
       }).select('-__v');
 
       res.json(issueList);
-      if (process.env.LOGGING === true) {
+      if (process.env.LOGGING) {
         console.log(`Served ${issueList.length} issues as part of get request`);
       }
     })
     
     .post(function (req, res){
-      if (process.env.LOGGING === true) {
+      if (process.env.LOGGING) {
         console.log(`Received Post request with following parameters:`);
         let logObject = structuredClone(req.body);
         logObject.project = req.params.project;
@@ -72,14 +72,14 @@ module.exports = function (app) {
       })
 
       newIssue.save();
-      if (process.env.LOGGING === true) {
+      if (process.env.LOGGING) {
         console.log(`Created issue with id: ${newIssue._id}`);
       }
       res.json(newIssue);
     })
     
     .put(async function (req, res){
-      if (process.env.LOGGING === true) {
+      if (process.env.LOGGING) {
         console.log(`Received Put request with following parameters:`);
         let logObject = structuredClone(req.body);
         logObject.project = req.params.project;
@@ -132,7 +132,7 @@ module.exports = function (app) {
           res.json({ error: 'could not update', '_id': req.body._id });
         } else {
           res.json({  result: 'successfully updated', '_id': req.body._id });
-          if (process.env.LOGGING === true) {
+          if (process.env.LOGGING) {
             console.log(`Successfully updated id: ${req.body._id}`)
           }
         }
@@ -140,7 +140,7 @@ module.exports = function (app) {
     })
     
     .delete(async function (req, res){
-      if (process.env.LOGGING === true) {
+      if (process.env.LOGGING) {
         console.log(`Received Delete request for project ${req.params.project}, issue ${req.body._id}`);
       }
 
@@ -158,7 +158,7 @@ module.exports = function (app) {
 
       if (deleteOutput.acknowledged === true && deleteOutput.deletedCount === 1) {
         res.json({ result: 'successfully deleted', '_id': req.body._id })
-        if (process.env.LOGGING === true) {
+        if (process.env.LOGGING) {
           console.log(`Successfully deleted id: ${req.body._id}`)
         }
       } else {
