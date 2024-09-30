@@ -26,8 +26,10 @@ module.exports = function (app) {
   app.route('/api/issues/:project')
   
     .get(async function (req, res){
-      console.log(`Received Get request for project: ${req.params.project} with query:`);
-      console.log(JSON.stringify(req.query));
+      if (process.env.LOGGING === true) {
+        console.log(`Received Get request for project: ${req.params.project} with query:`);
+        console.log(JSON.stringify(req.query));
+      }
 
       const issueList = await Issue.find({
         project_name: req.params.project,
@@ -35,14 +37,18 @@ module.exports = function (app) {
       }).select('-__v');
 
       res.json(issueList);
-      console.log(`Served ${issueList.length} issues as part of get request`);
+      if (process.env.LOGGING === true) {
+        console.log(`Served ${issueList.length} issues as part of get request`);
+      }
     })
     
     .post(function (req, res){
-      console.log(`Received Post request with following parameters:`);
-      let logObject = structuredClone(req.body);
-      logObject.project = req.params.project;
-      console.log(logObject);
+      if (process.env.LOGGING === true) {
+        console.log(`Received Post request with following parameters:`);
+        let logObject = structuredClone(req.body);
+        logObject.project = req.params.project;
+        console.log(logObject);
+      }
 
       let now = new Date();
 
@@ -66,15 +72,19 @@ module.exports = function (app) {
       })
 
       newIssue.save();
-      console.log(`Created issue with id: ${newIssue._id}`);
+      if (process.env.LOGGING === true) {
+        console.log(`Created issue with id: ${newIssue._id}`);
+      }
       res.json(newIssue);
     })
     
     .put(async function (req, res){
-      console.log(`Received Put request with following parameters:`);
-      let logObject = structuredClone(req.body);
-      logObject.project = req.params.project;
-      console.log(logObject);
+      if (process.env.LOGGING === true) {
+        console.log(`Received Put request with following parameters:`);
+        let logObject = structuredClone(req.body);
+        logObject.project = req.params.project;
+        console.log(logObject);
+      }
 
       let project = req.params.project;
       
@@ -122,13 +132,17 @@ module.exports = function (app) {
           res.json({ error: 'could not update', '_id': req.body._id });
         } else {
           res.json({  result: 'successfully updated', '_id': req.body._id });
-          console.log(`Successfully updated id: ${req.body._id}`)
+          if (process.env.LOGGING === true) {
+            console.log(`Successfully updated id: ${req.body._id}`)
+          }
         }
       })
     })
     
     .delete(async function (req, res){
-      console.log(`Received Delete request for project ${req.params.project}, issue ${req.body._id}`);
+      if (process.env.LOGGING === true) {
+        console.log(`Received Delete request for project ${req.params.project}, issue ${req.body._id}`);
+      }
 
       let project = req.params.project;
       
@@ -144,7 +158,9 @@ module.exports = function (app) {
 
       if (deleteOutput.acknowledged === true && deleteOutput.deletedCount === 1) {
         res.json({ result: 'successfully deleted', '_id': req.body._id })
-        console.log(`Successfully deleted id: ${req.body._id}`)
+        if (process.env.LOGGING === true) {
+          console.log(`Successfully deleted id: ${req.body._id}`)
+        }
       } else {
         res.json({ error: 'could not delete', '_id': req.body._id })
       }
