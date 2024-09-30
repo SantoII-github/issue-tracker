@@ -26,7 +26,8 @@ module.exports = function (app) {
   app.route('/api/issues/:project')
   
     .get(async function (req, res){
-      console.log(`Received Get request for project: ${req.params.project}`);
+      console.log(`Received Get request for project: ${req.params.project} with query:`);
+      console.log(JSON.stringify(req.query));
 
       let project = req.params.project;
       const queryObj = { project_name: project }
@@ -73,6 +74,8 @@ module.exports = function (app) {
       })
 
       res.json(issueListFormatted);
+      console.log(`served ${issueListFormatted.length} issues as part of get request`);
+      console.log(issueListFormatted);
     })
     
     .post(function (req, res){
@@ -83,7 +86,6 @@ module.exports = function (app) {
 
       let now = new Date();
 
-      // make sure necessary params are present
       if ( !req.body.issue_title || !req.body.issue_text || !req.body.created_by ) {
         res.json({
           error: 'required field(s) missing'
@@ -104,6 +106,7 @@ module.exports = function (app) {
       })
 
       newIssue.save();
+      console.log(`Created issue with id: ${newIssue._id}`);
       res.json(newIssue);
     })
     
@@ -127,7 +130,7 @@ module.exports = function (app) {
       }
 
       const issue = await Issue.findOne({ _id: req.body._id});
-      if (issue == null) {
+      if (issue == null || issue.project_name !== project) {
         res.json({ error: 'could not update', '_id': req.body._id })
         return;
       }
@@ -159,6 +162,7 @@ module.exports = function (app) {
           res.json({ error: 'could not update', '_id': req.body._id });
         } else {
           res.json({  result: 'successfully updated', '_id': req.body._id });
+          console.log(`Successfully updated id: ${req.body._id}`)
         }
       })
     })
@@ -180,6 +184,7 @@ module.exports = function (app) {
 
       if (deleteOutput.acknowledged === true && deleteOutput.deletedCount === 1) {
         res.json({ result: 'successfully deleted', '_id': req.body._id })
+        console.log(`Successfully deleted id: ${req.body._id}`)
       } else {
         res.json({ error: 'could not delete', '_id': req.body._id })
       }
