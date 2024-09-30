@@ -71,7 +71,7 @@ module.exports = function (app) {
     })
     
     .put(async function (req, res){
-      console.log(`Received Post request with following parameters:`);
+      console.log(`Received Put request with following parameters:`);
       let logObject = structuredClone(req.body);
       logObject.project = req.params.project;
       console.log(logObject);
